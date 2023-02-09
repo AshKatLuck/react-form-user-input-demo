@@ -1,4 +1,3 @@
-import { useState } from "react";
 import useInput from "../hooks/use-input";
 
 const SimpleInput = (props) => {
@@ -11,51 +10,39 @@ const SimpleInput = (props) => {
     reset: nameReset,
   } = useInput((value) => value.trim() !== "");
 
-  const [enteredEmail, setEnteredEmail] = useState("");
-  const [enteredEmailTouched, setEnteredEmailTouched] = useState(false);
-
-  const isEnteredEmailValid =
-    enteredEmail.trim() !== "" &&
-    enteredEmail.includes("@") &&
-    enteredEmail.includes(".");
-  const emailInputIsInvalid = !isEnteredEmailValid && enteredEmailTouched;
+  const {
+    value: enteredEmail,
+    isValid: enteredEmailIsValid,
+    hasError: emailHasError,
+    valueChangeHandler: emailChangeHandler,
+    inputBlurHandler: emailBlurHandler,
+    reset: emailReset,
+  } = useInput((value) => value.includes("@"));
 
   let formIsValid = false;
-  if (enteredNameIsValid && isEnteredEmailValid) {
+  if (enteredNameIsValid && enteredEmailIsValid) {
     formIsValid = true;
   }
-
-  const emailChangeHandler = (event) => {
-    setEnteredEmail(event.target.value);
-
-    setEnteredEmailTouched(true);
-  };
-
-  const emailInputBlurHandler = (event) => {
-    setEnteredEmailTouched(true);
-  };
 
   const submitFormHandler = (event) => {
     console.log("submit handler");
     event.preventDefault();
-    setEnteredEmailTouched(true);
-    if (!enteredNameIsValid || !isEnteredEmailValid) {
+
+    if (!enteredNameIsValid || !enteredEmailIsValid) {
       return;
     }
     console.log(enteredName);
     console.log(enteredEmail);
 
     nameReset();
-
-    setEnteredEmail("");
-    setEnteredEmailTouched(false);
+    emailReset();
   };
 
   const nameFieldClasses = !nameHasError
     ? "form-control"
     : "form-control invalid";
 
-  const emailFieldClasses = !emailInputIsInvalid
+  const emailFieldClasses = !emailHasError
     ? "form-control"
     : "form-control invalid";
 
@@ -78,13 +65,11 @@ const SimpleInput = (props) => {
           id="email"
           type="email"
           onChange={emailChangeHandler}
-          onBlur={emailInputBlurHandler}
+          onBlur={emailBlurHandler}
           value={enteredEmail}
         />
       </div>
-      {emailInputIsInvalid && (
-        <p className="error-text">Please enter an email id!</p>
-      )}
+      {emailHasError && <p className="error-text">Please enter an email id!</p>}
 
       <div className="form-actions">
         <button disabled={!formIsValid}>Submit</button>
